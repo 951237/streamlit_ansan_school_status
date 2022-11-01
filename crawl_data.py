@@ -4,6 +4,8 @@ import lxml
 import plotly.express as px
 import streamlit as st
 import matplotlib.pyplot as plt
+import datetime
+
 
 def read_html():
 	URL  = 'https://www.goeas.kr/USR/ORG/MNU13/SchoolList.do?orgType=Z'
@@ -25,5 +27,7 @@ def read_html():
 	df['사립'] = df['사립'].astype(int)
 	return df 
 
+# 파일이름 생성 - 년 월 일
+DATE = datetime.datetime.now().strftime ("%Y%m%d")
 df = read_html()
-df.to_csv('/data/data.csv')
+df.to_csv(f'data/{DATE}.csv')	# 파일저장하기
