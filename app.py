@@ -13,7 +13,7 @@ st.set_page_config(
     )
 
 # 파일 패스
-PATH_DATA = 'data/20221102.csv'
+# PATH_DATA = 'data/20221102.csv'
 
 # 폴더내에 파일 읽어오기
 def read_csv_files():
@@ -24,7 +24,7 @@ def read_csv_files():
 
 # 데이터 파일 불러오기
 def get_csvfile(p_file):
-	df = pd.read_csv(io = f'data/{p_file}')
+	df = pd.read_csv(io = f'./data/{p_file}')
 	return df
     
 
@@ -47,7 +47,7 @@ file_csvs = st.sidebar.selectbox(
 )
 
 # 데이터프레임 생성
-df = pd.read_csv(file_csvs, index_col=None)
+df = pd.read_csv(io = f'./data/{file_csvs}')
 st.dataframe(df)
 
 # 학교현황 막대그래프
