@@ -22,10 +22,6 @@ def read_csv_files():
 	lst_csv = [file for file in file_list if file.endswith(".csv")]	# 폴더내 확장자가 엑셀파일 인것을 리스트에 담기
 	return lst_csv
 
-# 데이터 파일 불러오기
-def get_csvfile(p_file):
-	df = pd.read_csv(io = f'./data/{p_file}')
-	return df
     
 
 # 마지막 파일 선택하기
@@ -35,6 +31,11 @@ def get_lastest_file():
     return lst_csv, lst_csv[-1]
 
 lst_csv, default_ix = get_lastest_file()	# 파일 목록과 최신 파일 선택하기
+
+# 데이터 파일 불러오기
+def get_csvfile(p_file):
+	df = pd.read_csv(f'./data/{p_file}', index_col=None)
+	return df
 
 # --- 사이드바 생성하기 ---
 st.sidebar.header("Please Filter Here:")	# 사이드바 헤더
