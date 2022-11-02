@@ -5,6 +5,7 @@ import datetime
 
 def read_html():
 	URL  = 'https://www.goeas.kr/USR/ORG/MNU13/SchoolList.do?orgType=Z'
+	print("Start to working. . .")
 	df = pd.read_html(URL, header=1)[0]
 	df = df[:5]   # '계' 열 삭제
  
@@ -26,4 +27,5 @@ def read_html():
 # 파일이름 생성 - 년 월 일
 DATE = datetime.datetime.now().strftime ("%Y%m%d")
 df = read_html()
+print("Save file. . .")
 df.to_csv(f'data/{DATE}.csv')	# 파일저장하기
