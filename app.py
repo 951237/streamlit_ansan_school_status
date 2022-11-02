@@ -12,9 +12,42 @@ st.set_page_config(
     layout = "wide"							# 레이아웃
     )
 
+# 파일 패스
 PATH_DATA = 'data/20221102.csv'
 
-df = pd.read_csv(PATH_DATA)
+# 폴더내에 파일 읽어오기
+def read_csv_files():
+	path = "./data"
+	file_list = os.listdir(path)
+	lst_csv = [file for file in file_list if file.endswith(".csv")]	# 폴더내 확장자가 엑셀파일 인것을 리스트에 담기
+	return lst_csv
+
+# 데이터 파일 불러오기
+def get_csvfile(p_file):
+	df = pd.read_csv(io = f'./data/{p_file}')
+	return df
+    
+
+# 마지막 파일 선택하기
+def get_lastest_file():
+    lst_csv = read_csv_files()
+    lst_csv.sort()
+    return lst_csv, lst_csv[-1]
+
+lst_csv, default_ix = get_lastest_file()	# 파일 목록과 최신 파일 선택하기
+
+# --- 사이드바 생성하기 ---
+st.sidebar.header("Please Filter Here:")	# 사이드바 헤더
+
+# 파일 선택하기
+file_csvs = st.sidebar.selectbox(
+	"Select data file:",
+	lst_csv,
+	index=lst_csv.index(default_ix)
+)
+
+# 데이터프레임 생성
+df = pd.read_csv(file_csvs, index_col=None)
 st.dataframe(df)
 
 # 학교현황 막대그래프
