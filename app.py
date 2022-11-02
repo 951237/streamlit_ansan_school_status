@@ -47,7 +47,7 @@ file_csvs = st.sidebar.selectbox(
 )
 
 # 데이터프레임 생성
-df = pd.read_csv(io = f'./data/{file_csvs}')
+df = get_csvfile(file_csvs)
 st.dataframe(df)
 
 # 학교현황 막대그래프
