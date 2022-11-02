@@ -24,7 +24,7 @@ def read_csv_files():
 
 # 데이터 파일 불러오기
 def get_csvfile(p_file):
-	df = pd.read_csv(io = f'./data/{p_file}')
+	df = pd.read_csv(io = f'data/{p_file}')
 	return df
     
 
