@@ -49,8 +49,17 @@ file_csvs = st.sidebar.selectbox(
 
 # 데이터프레임 생성
 df = get_csvfile(file_csvs)
-st.dataframe(df)
+# st.dataframe(df)
 
+# --- 메인 페이지 ---
+# st.write(f"### {str_now} 현재")
+st.title(":bar_chart: 안산지역 학교 현황판")
+
+# 화면 타이틀
+st.markdown("##")		# 마크다운 문법 가능
+
+
+st.write('## 관내 학교 현황')
 # 학교현황 막대그래프
 fig_total_school_num = px.bar(
     df,
@@ -62,6 +71,7 @@ fig_total_school_num = px.bar(
 
 st.plotly_chart(fig_total_school_num, use_container_width=True)
 
+st.write('## 학생수 현황')
 # 학생수현황 막대그래프
 fig_total_student_num = px.bar(
     df,
@@ -73,7 +83,8 @@ fig_total_student_num = px.bar(
 
 st.plotly_chart(fig_total_student_num, use_container_width=True)
 
-# 현황 막대그래프
+st.write('## 교원현황')
+# 교원현황 막대그래프
 fig_total_teacher_num = px.bar(
     df,
 	x = df['구분'],
@@ -84,6 +95,7 @@ fig_total_teacher_num = px.bar(
 
 st.plotly_chart(fig_total_teacher_num, use_container_width=True)
 
+st.write('## 국공립 학교 현황')
 # 공립, 사립, 국립 학교숫자 시각화
 fig = px.bar(
 	df,
