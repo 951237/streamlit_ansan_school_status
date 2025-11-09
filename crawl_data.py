@@ -4,23 +4,42 @@ import datetime
 import warnings
 import ssl
 import requests
-from urllib3.util.ssl_ import create_urllib3_context
+from urllib3 import PoolManager
 
 
-class CustomHttpAdapter(requests.adapters.HTTPAdapter):
-    """SSL 호환성을 위한 커스텀 어댑터"""
-    def init_poolmanager(self, connections, maxsize, block=False):
-        ctx = create_urllib3_context()
-        ctx.load_default_certs()
-        ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+class LegacySSLAdapter(requests.adapters.HTTPAdapter):
+    """구형 TLS 스택을 사용하는 서버와의 핸드셰이크를 허용하는 어댑터."""
+    CIPHERS = "DEFAULT:@SECLEVEL=1"
+
+    def __init__(self, *args, **kwargs):
+        self._ciphers = kwargs.pop("ciphers", self.CIPHERS)
+        super().__init__(*args, **kwargs)
+
+    def _build_ssl_context(self):
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ctx.set_ciphers(self._ciphers)
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
-        self.poolmanager = requests.packages.urllib3.poolmanager.PoolManager(
+        if hasattr(ssl, "OP_LEGACY_SERVER_CONNECT"):
+            ctx.options |= ssl.OP_LEGACY_SERVER_CONNECT
+        if hasattr(ssl, "TLSVersion"):
+            ctx.minimum_version = ssl.TLSVersion.TLSv1
+        return ctx
+
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        ctx = self._build_ssl_context()
+        self.poolmanager = PoolManager(
             num_pools=connections,
             maxsize=maxsize,
             block=block,
-            ssl_context=ctx
+            ssl_context=ctx,
+            **pool_kwargs,
         )
+
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        ctx = self._build_ssl_context()
+        proxy_kwargs["ssl_context"] = ctx
+        return super().proxy_manager_for(proxy, **proxy_kwargs)
 
 
 def read_html():
@@ -35,12 +54,9 @@ def read_html():
 	}
 	
 	try:
-		import requests
-		
-		# 커스텀 SSL 어댑터를 사용하는 세션 생성
 		session = requests.Session()
-		session.mount('https://', CustomHttpAdapter())
-		
+		session.mount('https://', LegacySSLAdapter())
+
 		response = session.get(URL, headers=headers, verify=False, timeout=30)
 		response.raise_for_status()
 		df = pd.read_html(response.text, header=1)[0]
