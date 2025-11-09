@@ -4,6 +4,7 @@ import lxml
 import plotly.express as px
 import streamlit as st
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 # streamlit 페이지 생성
 st.set_page_config(
@@ -52,11 +53,25 @@ df = get_csvfile(file_csvs)
 # st.dataframe(df)
 
 # --- 메인 페이지 ---
-# st.write(f"### {str_now} 현재")
 st.title(":bar_chart: 안산지역 학교 현황판")
+st.markdown("##")
 
-# 화면 타이틀
-st.markdown("##")		# 마크다운 문법 가능
+# 최종 데이터 수집 시각 배지
+try:
+    file_date = file_csvs.replace('.csv', '')
+    formatted_date = datetime.strptime(file_date, '%Y%m%d').strftime('%Y년 %m월 %d일')
+    st.info(f"📅 데이터 수집일: **{formatted_date}**")
+except:
+    st.info(f"📅 데이터 파일: **{file_csvs}**")
+
+# 주요 지표 스냅샷
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric(label="총 학교 수", value=f"{df['계'].sum()}개")
+with col2:
+    st.metric(label="총 학생 수", value=f"{df['학생수'].sum():,}명")
+with col3:
+    st.metric(label="총 교원 수", value=f"{df['교원수'].sum():,}명")
 
 
 st.write('## 관내 학교 현황')

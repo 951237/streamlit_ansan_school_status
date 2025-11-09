@@ -1,0 +1,55 @@
+name: Daily Data Crawl
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 매일 한국시간 오전 10시 (UTC 01:00)
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  crawl-and-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install pandas lxml requests
+          
+      - name: Run data crawler
+        run: |
+          python crawl_data.py
+          
+      - name: Check for changes
+        id: verify
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ New data file created"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected"
+          fi
+          
+      - name: Commit and push changes
+        if: steps.verify.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/*.csv
+          DATE=$(date +'%Y-%m-%d')
+          git commit -m "데이터 자동 수집: ${DATE}"
+          git push
+          
+      - name: Notify via UptimeRobot Heartbeat (Optional)
+        if: always()
+        run: |
+          # UptimeRobot 하트비트 모니터를 설정한 경우 아래 주석 해제
+          # curl -X POST "https://heartbeat.uptimerobot.com/YOUR_HEARTBEAT_KEY"
+          echo "✅ Workflow completed"
