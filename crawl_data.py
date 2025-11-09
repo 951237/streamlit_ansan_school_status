@@ -1,12 +1,29 @@
 import os
 import pandas as pd
 import datetime
+import warnings
 
 
 def read_html():
-	URL  = 'https://www.goeas.kr/USR/ORG/MNU13/SchoolList.do?orgType=Z'
+	URL  = 'https://www.goeas.kr/goeas/cm/cntnts/cntntsView.do?mi=11528&cntntsId=1514'
 	print("Start to working. . .")
-	df = pd.read_html(URL, header=1)[0]
+	
+	# SSL 경고 무시
+	warnings.filterwarnings('ignore')
+	
+	headers = {
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+	}
+	
+	try:
+		import requests
+		response = requests.get(URL, headers=headers, verify=False, timeout=30)
+		response.raise_for_status()
+		df = pd.read_html(response.text, header=1)[0]
+		print(f"✅ Data fetched successfully: {len(df)} rows")
+	except Exception as e:
+		print(f"❌ Error fetching data: {e}")
+		raise
 	df = df[:5]   # '계' 열 삭제
  
 	# 공립, 사립 칼럼의 '-' 없애기

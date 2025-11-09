@@ -20,7 +20,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          pip install pandas lxml requests
+          pip install pandas lxml requests html5lib
           
       - name: Run data crawler
         run: |
