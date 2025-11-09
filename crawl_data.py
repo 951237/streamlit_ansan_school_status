@@ -2,6 +2,25 @@ import os
 import pandas as pd
 import datetime
 import warnings
+import ssl
+import requests
+from urllib3.util.ssl_ import create_urllib3_context
+
+
+class CustomHttpAdapter(requests.adapters.HTTPAdapter):
+    """SSL 호환성을 위한 커스텀 어댑터"""
+    def init_poolmanager(self, connections, maxsize, block=False):
+        ctx = create_urllib3_context()
+        ctx.load_default_certs()
+        ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        self.poolmanager = requests.packages.urllib3.poolmanager.PoolManager(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            ssl_context=ctx
+        )
 
 
 def read_html():
@@ -17,7 +36,12 @@ def read_html():
 	
 	try:
 		import requests
-		response = requests.get(URL, headers=headers, verify=False, timeout=30)
+		
+		# 커스텀 SSL 어댑터를 사용하는 세션 생성
+		session = requests.Session()
+		session.mount('https://', CustomHttpAdapter())
+		
+		response = session.get(URL, headers=headers, verify=False, timeout=30)
 		response.raise_for_status()
 		df = pd.read_html(response.text, header=1)[0]
 		print(f"✅ Data fetched successfully: {len(df)} rows")
